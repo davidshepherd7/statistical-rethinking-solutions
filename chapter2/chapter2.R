@@ -1,10 +1,11 @@
 library(rethinking)
+library(purrr)
 
-## 2M1
+## 2M1, 2M2
 
-globe.grid <- function(w, n) {
+globe.grid <- function(w, n, prior) {
     p_grid <- seq( from=0 , to=1 , length.out=20 )
-    prior <- rep( 1 , 20 )
+    prior <- map_dbl(p_grid, prior)
     likelihood <- dbinom( w , size=n , prob=p_grid )
     unstd.posterior <- likelihood * prior
     posterior <- unstd.posterior / sum(unstd.posterior)
@@ -15,7 +16,23 @@ globe.grid <- function(w, n) {
     return(posterior)
 }
 
-## globe.grid(6, 9)
-## globe.grid(3, 3)
-## globe.grid(3,4)
-## globe.grid(5, 7)
+uniform.prior <- function(x) {
+    return(1)
+}
+
+step.prior <- function(x) {
+    if(x < 0.5)
+        return(0)
+    else
+        return(1)
+}
+
+## globe.grid(6, 9, uniform.prior)
+## globe.grid(3, 3, uniform.prior)
+## globe.grid(3, 4, uniform.prior)
+## globe.grid(5, 7, uniform.prior)
+
+## globe.grid(6, 9, step.prior)
+## globe.grid(3, 3, step.prior)
+## globe.grid(3, 4, step.prior)
+## globe.grid(5, 7, step.prior)
