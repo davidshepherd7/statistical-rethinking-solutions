@@ -36,3 +36,18 @@ step.prior <- function(x) {
 ## globe.grid(3, 3, step.prior)
 ## globe.grid(3, 4, step.prior)
 ## globe.grid(5, 7, step.prior)
+
+
+## 2M3
+{
+    prior <- c(1, 1)
+    earth.mars.grid <- c(0.7, 0)
+    n <- 1
+    w <- 0
+    likelihood <- dbinom(w, n, earth.mars.grid)
+    unstd.posterior <- likelihood * prior
+    posterior <- unstd.posterior / sum(unstd.posterior)
+
+    print(paste("earth:", posterior[1]))
+    print(paste("mars:", posterior[2]))
+}
