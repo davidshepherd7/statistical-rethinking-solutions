@@ -251,20 +251,20 @@ curve( dnorm( x , 178 , 20 ) , from=100 , to=250 )
 curve( dunif( x , 0 , 50 ) , from=-10 , to=60 )
 
 ## R code 4.13
-sample_mu <- rnorm( 1e4 , 178 , 20 )
-sample_sigma <- runif( 1e4 , 0 , 50 )
-prior_h <- rnorm( 1e4 , sample_mu , sample_sigma )
+count <- 1e6
+sample_mu <- rnorm( count , 178 , 20 )
+sample_sigma <- runif( count , 0 , 50 )
+prior_h <- rnorm( count , sample_mu , sample_sigma )
 dens( prior_h )
 
 ## R code 4.14
 mu.list <- seq( from=140, to=160 , length.out=200 )
 sigma.list <- seq( from=4 , to=9 , length.out=200 )
 post <- expand.grid( mu=mu.list , sigma=sigma.list )
-post$LL <- sapply( 1:nrow(post) , function(i) sum( dnorm(
-                                                  d2$height ,
-                                                  mean=post$mu[i] ,
-                                                  sd=post$sigma[i] ,
-                                                  log=TRUE ) ) )
+post$LL <- sapply(
+    1: nrow(post) ,
+    function(i) sum( dnorm(d2$height , mean=post$mu[i] , sd=post$sigma[i] , log=TRUE ) )
+)
 post$prod <- post$LL + dnorm( post$mu , 178 , 20 , TRUE ) +
     dunif( post$sigma , 0 , 50 , TRUE )
 post$prob <- exp( post$prod - max(post$prod) )
@@ -282,11 +282,11 @@ sample.mu <- post$mu[ sample.rows ]
 sample.sigma <- post$sigma[ sample.rows ]
 
 ## R code 4.18
-plot( sample.mu , sample.sigma , cex=0.5 , pch=16 , col=col.alpha(rangi2,0.1) )
+plot( sample.mu , sample.sigma , cex=3 , pch=2 , col=col.alpha(rangi2,0.1) )
 
 ## R code 4.19
-dens( sample.mu )
-dens( sample.sigma )
+dens( sample.mu, show.HPDI = 0.5)
+dens( sample.sigma, show.HPDI = 0.5 )
 
 ## R code 4.20
 HPDI( sample.mu )
@@ -498,7 +498,7 @@ str(mu)
 
 ## R code 4.55
                                         # use type="n" to hide raw data
-plot( height ~ weight , d2 , type="n" )
+plot( height ~ weight , d2  )
 
                                         # loop over samples and plot each mu value
 for ( i in 1:100 )
@@ -801,11 +801,34 @@ for ( i in 1:nrow(d) ) {
 }
 
 ## R code 5.15
-N <- 100                         # number of cases
+N <- 1000                         # number of cases
 x_real <- rnorm( N )             # x_real as Gaussian with mean 0 and stddev 1
 x_spur <- rnorm( N , x_real )    # x_spur as Gaussian with mean=x_real
 y <- rnorm( N , x_real )         # y as Gaussian with mean=x_real
 d <- data.frame(y,x_real,x_spur) # bind all together in data frame
+
+########################
+
+library(rethinking)
+spur.assoc.fit <- map(
+    alist(
+        y ~ dnorm(mu, sigma),
+        mu ~ a + b.real * x_real + b.spur * x_spur,
+        a ~ dnorm(0, 10),
+        b.real ~ dnorm(1, 10),
+        b.spur ~ dnorm(1, 10),
+        sigma ~ dunif(0, 50)
+    ),
+    data=d
+)
+precis(spur.assoc.fit)
+
+plot(d)
+
+########################
+
+
+
 
 ## R code 5.16
 library(rethinking)
