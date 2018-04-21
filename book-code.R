@@ -896,7 +896,23 @@ m5.6 <- map(
         sigma ~ dunif( 0 , 1 )
     ) ,
     data=dcc )
-precis(m5.6)
+precis(m5.6, digits=3)
+
+################################################################
+{
+    np.seq <- -3:5
+    pred.data <- data.frame( log.mass=np.seq)
+    mu <- link( m5.6 , data=pred.data , n=1e4 )
+    mu.mean <- apply( mu , 2 , mean )
+    mu.PI <- apply( mu , 2 , PI )
+    plot( kcal.per.g ~ log.mass , data=dcc , col=rangi2 )
+    lines( np.seq , mu.mean )
+    lines( np.seq , mu.PI[1,] , lty=2 )
+    lines( np.seq , mu.PI[2,] , lty=2 )
+}
+################################################################
+
+
 
 ## R code 5.26
 m5.7 <- map(
@@ -909,7 +925,7 @@ m5.7 <- map(
         sigma ~ dunif( 0 , 1 )
     ) ,
     data=dcc )
-precis(m5.7)
+precis(m5.7, digits=3)
 
 ## R code 5.27
 mean.log.mass <- mean( log(dcc$mass) )
@@ -923,17 +939,38 @@ mu <- link( m5.7 , data=pred.data , n=1e4 )
 mu.mean <- apply( mu , 2 , mean )
 mu.PI <- apply( mu , 2 , PI )
 
-plot( kcal.per.g ~ neocortex.perc , data=dcc , type="n" )
+plot( kcal.per.g ~ neocortex.perc , data=dcc )
 lines( np.seq , mu.mean )
 lines( np.seq , mu.PI[1,] , lty=2 )
 lines( np.seq , mu.PI[2,] , lty=2 )
+
+################################################################
+{
+    mean.neocortex.perc <- mean(dcc$neocortex.perc)
+    log.mass.seq <- -3:4
+    pred.data <- data.frame(
+        log.mass=log.mass.seq,
+        neocortex.perc=mean.neocortex.perc
+    )
+
+    mu <- link(m5.7, data=pred.data, n=1e4)
+    mu.mean <- apply( mu , 2 , mean )
+    mu.PI <- apply( mu , 2 , PI )
+
+    plot( kcal.per.g ~ log.mass , data=dcc )
+    lines( log.mass.seq , mu.mean )
+    lines( log.mass.seq , mu.PI[1,] , lty=2 )
+    lines( log.mass.seq , mu.PI[2,] , lty=2 )
+
+}
+################################################################
 
 ## R code 5.28
 N <- 100                         # number of cases
 rho <- 0.7                       # correlation btw x_pos and x_neg
 x_pos <- rnorm( N )              # x_pos as Gaussian
 x_neg <- rnorm( N , rho*x_pos ,  # x_neg correlated with x_pos
-               sqrt(1-rho^2) )
+              sqrt(1-rho^2) )
 y <- rnorm( N , x_pos - x_neg )  # y equally associated with x_pos, x_neg
 d <- data.frame(y,x_pos,x_neg)   # bind all together in data frame
 
@@ -1055,7 +1092,7 @@ plot( stddev ~ r.seq , type="l" , col=rangi2, lwd=2 , xlab="correlation" )
 
 ## R code 5.41
                                         # number of plants
-N <- 100
+N <- 10000
 
                                         # simulate initial heights
 h0 <- rnorm(N,10,2)
